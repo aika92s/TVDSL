@@ -1,0 +1,93 @@
+{"name": "good_empty", "input": "", "expected": ""}
+{"name": "good_spaces", "input": " \t ", "expected": ""}
+{"name": "good_tabs", "input": "\t\t\t", "expected": ""}
+{"name": "good_crlf", "input": "\r\n\r\n", "expected": ""}
+{"name": "good_mixed_whitespace", "input": " \t\r\n \t\r\n", "expected": ""}
+{"name": "good_int_zero", "input": "0", "expected": "INT(0)"}
+{"name": "good_int_multi_digit", "input": "123", "expected": "INT(123)"}
+{"name": "good_int_max_like", "input": "2147483647", "expected": "INT(2147483647)"}
+{"name": "good_ident", "input": "gcd", "expected": "IDENT(gcd)"}
+{"name": "good_ident_digits", "input": "a1b2c3", "expected": "IDENT(a1b2c3)"}
+{"name": "good_ident_upper", "input": "Function", "expected": "IDENT(Function)"}
+{"name": "good_formula_is_not_keyword", "input": "formula", "expected": "IDENT(formula)"}
+{"name": "good_keyword_function", "input": "function", "expected": "KW_FUNCTION(function)"}
+{"name": "good_keyword_returns", "input": "returns", "expected": "KW_RETURNS(returns)"}
+{"name": "good_keyword_requires", "input": "requires", "expected": "KW_REQUIRES(requires)"}
+{"name": "good_keyword_ensures", "input": "ensures", "expected": "KW_ENSURES(ensures)"}
+{"name": "good_keyword_uses", "input": "uses", "expected": "KW_USES(uses)"}
+{"name": "good_keyword_while", "input": "while", "expected": "KW_WHILE(while)"}
+{"name": "good_keyword_if", "input": "if", "expected": "KW_IF(if)"}
+{"name": "good_keyword_else", "input": "else", "expected": "KW_ELSE(else)"}
+{"name": "good_keyword_assert", "input": "assert", "expected": "KW_ASSERT(assert)"}
+{"name": "good_keyword_assume", "input": "assume", "expected": "KW_ASSUME(assume)"}
+{"name": "good_keyword_invariant", "input": "invariant", "expected": "KW_INVARIANT(invariant)"}
+{"name": "good_keyword_length", "input": "length", "expected": "KW_LENGTH(length)"}
+{"name": "good_keyword_int", "input": "int", "expected": "KW_INT(int)"}
+{"name": "good_keyword_true", "input": "true", "expected": "KW_TRUE(true)"}
+{"name": "good_keyword_false", "input": "false", "expected": "KW_FALSE(false)"}
+{"name": "good_keyword_not", "input": "not", "expected": "KW_NOT(not)"}
+{"name": "good_keyword_and", "input": "and", "expected": "KW_AND(and)"}
+{"name": "good_keyword_or", "input": "or", "expected": "KW_OR(or)"}
+{"name": "good_keyword_forall", "input": "forall", "expected": "KW_FORALL(forall)"}
+{"name": "good_keyword_exists", "input": "exists", "expected": "KW_EXISTS(exists)"}
+{"name": "good_keyword_prefix_is_ident", "input": "functions iffy", "expected": "IDENT(functions) IDENT(iffy)"}
+{"name": "good_keyword_then_ident", "input": "if iffy", "expected": "KW_IF(if) IDENT(iffy)"}
+{"name": "good_delimiters", "input": "()[]{},;:", "expected": "OP_LPAREN(() OP_RPAREN()) OP_LBRACKET([) OP_RBRACKET(]) OP_LBRACE({) OP_RBRACE(}) OP_COMMA(,) OP_SEMI(;) OP_COLON(:)"}
+{"name": "good_arithmetic", "input": "+ - * /", "expected": "OP_PLUS(+) OP_MINUS(-) OP_STAR(*) OP_SLASH(/)"}
+{"name": "good_comparison", "input": "== != <= >= < >", "expected": "OP_EQ(==) OP_NEQ(!=) OP_LE(<=) OP_GE(>=) OP_LT(<) OP_GT(>)"}
+{"name": "good_assign_vs_eq", "input": "a=b a==b", "expected": "IDENT(a) OP_ASSIGN(=) IDENT(b) IDENT(a) OP_EQ(==) IDENT(b)"}
+{"name": "good_maximal_munch_triple_eq", "input": "===", "expected": "OP_EQ(==) OP_ASSIGN(=)"}
+{"name": "good_arrow_and_pipe", "input": "a => b | c", "expected": "IDENT(a) OP_ARROW(=>) IDENT(b) OP_PIPE(|) IDENT(c)"}
+{"name": "good_implication_chain", "input": "a -> b -> c", "expected": "IDENT(a) OP_IMPLIES(->) IDENT(b) OP_IMPLIES(->) IDENT(c)"}
+{"name": "good_minus_gt_separated", "input": "x - >", "expected": "IDENT(x) OP_MINUS(-) OP_GT(>)"}
+{"name": "good_comment_skipped", "input": "x = 1; // set x\ny = 2;", "expected": "IDENT(x) OP_ASSIGN(=) INT(1) OP_SEMI(;) IDENT(y) OP_ASSIGN(=) INT(2) OP_SEMI(;)"}
+{"name": "good_comment_eof_no_newline", "input": "x = 1; // tail", "expected": "IDENT(x) OP_ASSIGN(=) INT(1) OP_SEMI(;)"}
+{"name": "good_comment_only", "input": "//", "expected": ""}
+{"name": "good_comment_crlf", "input": "a // c\r\nb", "expected": "IDENT(a) IDENT(b)"}
+{"name": "good_comment_lone_cr", "input": "a // c\rb", "expected": "IDENT(a) IDENT(b)"}
+{"name": "good_slash_vs_comment", "input": "a / b // c", "expected": "IDENT(a) OP_SLASH(/) IDENT(b)"}
+{"name": "good_array_type", "input": "a: int[]", "expected": "IDENT(a) OP_COLON(:) KW_INT(int) OP_LBRACKET([) OP_RBRACKET(])"}
+{"name": "good_array_access", "input": "a[i] = length(a);", "expected": "IDENT(a) OP_LBRACKET([) IDENT(i) OP_RBRACKET(]) OP_ASSIGN(=) KW_LENGTH(length) OP_LPAREN(() IDENT(a) OP_RPAREN()) OP_SEMI(;)"}
+{"name": "good_quantifier", "input": "forall(i: int | i >= 0)", "expected": "KW_FORALL(forall) OP_LPAREN(() IDENT(i) OP_COLON(:) KW_INT(int) OP_PIPE(|) IDENT(i) OP_GE(>=) INT(0) OP_RPAREN())"}
+{"name": "good_formula_def", "input": "pos(x: int) => x > 0", "expected": "IDENT(pos) OP_LPAREN(() IDENT(x) OP_COLON(:) KW_INT(int) OP_RPAREN()) OP_ARROW(=>) IDENT(x) OP_GT(>) INT(0)"}
+{"name": "good_function_header", "input": "gcd(x: int, y: int)\n  returns r: int", "expected": "IDENT(gcd) OP_LPAREN(() IDENT(x) OP_COLON(:) KW_INT(int) OP_COMMA(,) IDENT(y) OP_COLON(:) KW_INT(int) OP_RPAREN()) KW_RETURNS(returns) IDENT(r) OP_COLON(:) KW_INT(int)"}
+{"name": "bad_ident_underscore", "input": "my_var", "expected": "IDENT(my) ERR(_) IDENT(var)"}
+{"name": "bad_leading_underscore", "input": "_x", "expected": "ERR(_) IDENT(x)"}
+{"name": "bad_non_ascii_latin1", "input": "x = caf\u00e9;", "expected": "IDENT(x) OP_ASSIGN(=) IDENT(caf) ERR(\u00e9) OP_SEMI(;)"}
+{"name": "bad_unicode_arrow_utf8", "input": "a \u00e2\u0086\u0092 b", "expected": "IDENT(a) ERR(\u00e2) ERR(\u0086) ERR(\u0092) IDENT(b)"}
+{"name": "bad_comment_cut_by_non_ascii", "input": "// \u00e9", "expected": "ERR(\u00e9)"}
+{"name": "bad_nul_byte", "input": "\u0000", "expected": "ERR(\u0000)"}
+{"name": "bad_lone_bang", "input": "!", "expected": "ERR(!)"}
+{"name": "bad_unused_ascii", "input": "@ # $ % ^ & ~ ` ? . ' \"", "expected": "ERR(@) ERR(#) ERR($) ERR(%) ERR(^) ERR(&) ERR(~) ERR(`) ERR(?) ERR(.) ERR(') ERR(\")"}
+{"name": "bad_double_amp", "input": "a && b", "expected": "IDENT(a) ERR(&) ERR(&) IDENT(b)"}
+{"name": "good_int_00_is_two_tokens", "input": "00", "expected": "INT(0) INT(0)"}
+{"name": "good_int_01_is_two_tokens", "input": "01", "expected": "INT(0) INT(1)"}
+{"name": "good_int_007_is_three_tokens", "input": "007", "expected": "INT(0) INT(0) INT(7)"}
+{"name": "good_int_then_ident", "input": "1a", "expected": "INT(1) IDENT(a)"}
+{"name": "good_whole_0", "input": "0", "expected": "INT", "mode": "whole"}
+{"name": "good_whole_7", "input": "7", "expected": "INT", "mode": "whole"}
+{"name": "good_whole_10", "input": "10", "expected": "INT", "mode": "whole"}
+{"name": "good_whole_123", "input": "123", "expected": "INT", "mode": "whole"}
+{"name": "good_whole_if", "input": "if", "expected": "KW_IF", "mode": "whole"}
+{"name": "good_whole_iffy", "input": "iffy", "expected": "IDENT", "mode": "whole"}
+{"name": "good_whole_a1", "input": "a1", "expected": "IDENT", "mode": "whole"}
+{"name": "good_whole_eq", "input": "==", "expected": "OP_EQ", "mode": "whole"}
+{"name": "good_whole_arrow", "input": "=>", "expected": "OP_ARROW", "mode": "whole"}
+{"name": "good_whole_implies", "input": "->", "expected": "OP_IMPLIES", "mode": "whole"}
+{"name": "good_whole_comment_text", "input": "// c", "expected": "COMMENT", "mode": "whole"}
+{"name": "good_whole_comment_empty", "input": "//", "expected": "COMMENT", "mode": "whole"}
+{"name": "good_whole_whitespace", "input": " \t\r\n", "expected": "WS", "mode": "whole"}
+{"name": "bad_whole_00", "input": "00", "expected": "REJECT", "mode": "whole"}
+{"name": "bad_whole_01", "input": "01", "expected": "REJECT", "mode": "whole"}
+{"name": "bad_whole_007", "input": "007", "expected": "REJECT", "mode": "whole"}
+{"name": "bad_whole_empty", "input": "", "expected": "REJECT", "mode": "whole"}
+{"name": "bad_whole_underscore", "input": "my_var", "expected": "REJECT", "mode": "whole"}
+{"name": "bad_whole_starts_with_digit_ident", "input": "1a", "expected": "REJECT", "mode": "whole"}
+{"name": "bad_whole_lone_bang", "input": "!", "expected": "REJECT", "mode": "whole"}
+{"name": "bad_whole_two_tokens", "input": "a b", "expected": "REJECT", "mode": "whole"}
+{"name": "bad_whole_minus_one", "input": "-1", "expected": "REJECT", "mode": "whole"}
+{"name": "bad_whole_triple_arrow", "input": "=>>", "expected": "REJECT", "mode": "whole"}
+{"name": "bad_whole_non_ascii", "input": "\u00e9", "expected": "REJECT", "mode": "whole"}
+{"name": "bad_whole_utf8_arrow", "input": "\u00e2\u0086\u0092", "expected": "REJECT", "mode": "whole"}
+{"name": "bad_whole_comment_with_newline", "input": "//x\ny", "expected": "REJECT", "mode": "whole"}
+{"name": "bad_whole_slash_space_slash", "input": "/ /", "expected": "REJECT", "mode": "whole"}
