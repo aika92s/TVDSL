@@ -4,7 +4,6 @@
 #include <map>
 #include <queue>
 #include <set>
-#include <sstream>
 #include <stdexcept>
 
 namespace funnylex {
@@ -18,11 +17,19 @@ std::vector<TokenDef> loadTokenDefs(const std::string& path) {
     std::string line;
     while (std::getline(in, line)) {
         line = line.substr(0, line.find('#'));
-        std::istringstream iss(line);
+        const char* ws = " \t\r\n";
+        // line = <имя> <вид> <регулярка>
+        size_t b1 = line.find_first_not_of(ws);
+        if (b1 == std::string::npos) continue;  // пустая строка / комментарий
+        size_t e1 = line.find_first_of(ws, b1);
+        size_t b2 = line.find_first_not_of(ws, e1);
+        if (e1 == std::string::npos || b2 == std::string::npos) continue;
+        size_t e2 = line.find_first_of(ws, b2);
+
         TokenDef d;
-        std::string kind;
-        if (!(iss >> d.name >> kind)) continue;  // пустая строка / комментарий
-        std::getline(iss, d.regex);
+        d.name = line.substr(b1, e1 - b1);
+        std::string kind = line.substr(b2, e2 == std::string::npos ? e2 : e2 - b2);
+        if (e2 != std::string::npos) d.regex = line.substr(e2);
         d.regex.erase(0, d.regex.find_first_not_of(" \t"));
         d.regex.erase(d.regex.find_last_not_of(" \t\r") + 1);
         if (d.regex.empty() || (kind != "SKIP" && kind != "TOKEN"))
@@ -39,9 +46,8 @@ std::vector<TokenDef> loadTokenDefs(const std::string& path) {
 
 namespace {
 
-struct Frag { int s, e; };
+struct Frag { int s, e; }; //вход и выход куска автомата
 
-// Фрагменты НКА строятся сразу, без AST.
 class RegexBuilder {
 public:
     explicit RegexBuilder(NFA& nfa) : nfa_(nfa) {}
@@ -56,31 +62,39 @@ public:
 
 private:
     NFA& nfa_;
-    std::string pat_;
+    std::string pat_; //регулярка
     size_t pos_ = 0;
 
     [[noreturn]] void fail(const std::string& msg) const {
         throw std::runtime_error(msg + " in regex '" + pat_ + "' at " + std::to_string(pos_));
     }
+
+    //Возвращает true, если ещё есть непрочитанные символы
     bool more() const { return pos_ < pat_.size(); }
+
+    //бавляет в nfa_.states пустое состояние
     int newState() {
         nfa_.states.emplace_back();
         return static_cast<int>(nfa_.states.size()) - 1;
     }
+
+    //строит самый маленький кусок автомата из двух состояний s и e (ребра)
     Frag single(const std::vector<int>& symbols) {
         Frag f{newState(), newState()};
         for (int c : symbols) nfa_.states[f.s].edges.push_back({c, f.e});
         return f;
     }
+
     Frag wrap(Frag a, bool skipAllowed, bool repeatAllowed) {  // ?, +, * через epsilon
         Frag f{newState(), newState()};
         nfa_.states[f.s].eps.push_back(a.s);
-        if (skipAllowed) nfa_.states[f.s].eps.push_back(f.e);
+        if (skipAllowed) nfa_.states[f.s].eps.push_back(f.e); // можно пройти мимо a (нужно для * и ?);
         nfa_.states[a.e].eps.push_back(f.e);
-        if (repeatAllowed) nfa_.states[a.e].eps.push_back(a.s);
+        if (repeatAllowed) nfa_.states[a.e].eps.push_back(a.s); // можно повторить a (нужно для * и +).
         return f;
     }
 
+    // ветвление |
     Frag alt() {
         Frag left = concat();
         while (more() && pat_[pos_] == '|') {
@@ -94,10 +108,11 @@ private:
         }
         return left;
     }
+
     Frag concat() {
         if (!more() || pat_[pos_] == '|' || pat_[pos_] == ')') {  // пустая ветка
             Frag f{newState(), newState()};
-            nfa_.states[f.s].eps.push_back(f.e);
+            nfa_.states[f.s].eps.push_back(f.e); //возвращается фрагмент из двух состояний с одним ε-переходом
             return f;
         }
         Frag f = repeat();
@@ -173,11 +188,12 @@ private:
 
 NFA buildNFA(const std::vector<TokenDef>& defs) {
     NFA nfa;
-    nfa.states.emplace_back();  // общее стартовое состояние
+    nfa.states.emplace_back();  // создаёт общее стартовое состояние 0
     RegexBuilder rb(nfa);
     for (size_t i = 0; i < defs.size(); ++i) {
         Frag f;
         try {
+            //для каждого токена строит фрагмент через RegexBuilder и соединяет 0 с его входом по ε.
             f = rb.build(defs[i].regex);
         } catch (const std::exception& ex) {
             throw std::runtime_error("token " + defs[i].name + ": " + ex.what());
@@ -195,7 +211,7 @@ NFA buildNFA(const std::vector<TokenDef>& defs) {
 
 namespace {
 using StateSet = std::set<int>;
-
+//добавляет все состояния, достижимые по ε-переходам
 StateSet closure(const NFA& nfa, StateSet set) {
     std::vector<int> stack(set.begin(), set.end());
     while (!stack.empty()) {
@@ -207,7 +223,7 @@ StateSet closure(const NFA& nfa, StateSet set) {
     return set;
 }
 }
-
+//Превращает НКА в ДКА (не законченный)
 DFA subsetConstruction(const NFA& nfa, const std::vector<TokenDef>& defs) {
     DFA dfa;
     dfa.names.push_back("NONE");
@@ -215,6 +231,8 @@ DFA subsetConstruction(const NFA& nfa, const std::vector<TokenDef>& defs) {
 
     std::map<StateSet, int> id;
     std::vector<StateSet> sets;
+
+    //выдаёт номер ДКА-состоянию
     auto intern = [&](const StateSet& s) {
         auto ins = id.emplace(s, static_cast<int>(sets.size()));
         if (ins.second) { sets.push_back(s); dfa.states.emplace_back(); }
@@ -242,7 +260,7 @@ DFA subsetConstruction(const NFA& nfa, const std::vector<TokenDef>& defs) {
     }
     return dfa;
 }
-
+    //Добавляет одно новое состояние (ловушку) и заменяет все -1 на него
 DFA completeWithTrap(const DFA& dfa) {
     if (dfa.trap != -1) return dfa;
     DFA out = dfa;
@@ -253,9 +271,7 @@ DFA completeWithTrap(const DFA& dfa) {
             if (t == -1) t = out.trap;
     return out;
 }
-
-// минимизация
-
+    //cостояния, до которых не дойти, выбрасываются (обход в ширину)
 namespace {
 DFA removeUnreachable(const DFA& d) {
     std::vector<int> newId(d.states.size(), -1), order{d.start};
@@ -266,6 +282,8 @@ DFA removeUnreachable(const DFA& d) {
                 newId[t] = static_cast<int>(order.size());
                 order.push_back(t);
             }
+
+    //переходы переписываются на новые номера
     DFA out;
     out.names = d.names;
     for (int old : order) {
@@ -430,6 +448,7 @@ bool Lexer::acceptsWhole(const std::string& input, std::string* type) const {
     return true;
 }
 
+    //режет текст на токены, каждый раз беря самую длинную подходящую лексему.
 std::vector<Token> Lexer::tokenize(const std::string& input) const {
     std::vector<Token> out;
     size_t i = 0;
