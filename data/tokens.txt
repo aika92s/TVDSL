@@ -1,0 +1,55 @@
+# ИМЯ  SKIP|TOKEN  регулярное_выражение
+# Порядок строк = приоритет при совпадении одной длины (ключевые слова раньше IDENT).
+WS  SKIP  [ \t\r\n]+
+COMMENT  SKIP  //[^\r\n]*
+
+KW_FUNCTION  TOKEN  function
+KW_RETURNS  TOKEN  returns
+KW_REQUIRES  TOKEN  requires
+KW_ENSURES  TOKEN  ensures
+KW_USES  TOKEN  uses
+KW_IF  TOKEN  if
+KW_ELSE  TOKEN  else
+KW_WHILE  TOKEN  while
+KW_INVARIANT  TOKEN  invariant
+KW_TRUE  TOKEN  true
+KW_FALSE  TOKEN  false
+KW_NOT  TOKEN  not
+KW_AND  TOKEN  and
+KW_OR  TOKEN  or
+KW_FORALL  TOKEN  forall
+KW_EXISTS  TOKEN  exists
+KW_LENGTH  TOKEN  length
+KW_ASSERT  TOKEN  assert
+KW_ASSUME  TOKEN  assume
+KW_INT  TOKEN  int
+
+# Funny: латинская буква, затем буквы/цифры; подчёркивания нет.
+IDENT  TOKEN  [a-zA-Z][a-zA-Z0-9]*
+# 0 или цифра 1-9 с хвостом: 00 и 01 не принимаются одним токеном.
+INT  TOKEN  0|[1-9][0-9]*
+
+OP_ARROW  TOKEN  =>
+OP_IMPLIES  TOKEN  ->
+OP_EQ  TOKEN  ==
+OP_NEQ  TOKEN  !=
+OP_LE  TOKEN  <=
+OP_GE  TOKEN  >=
+OP_ASSIGN  TOKEN  =
+OP_LT  TOKEN  <
+OP_GT  TOKEN  >
+
+OP_LPAREN  TOKEN  \(
+OP_RPAREN  TOKEN  \)
+OP_LBRACKET  TOKEN  \[
+OP_RBRACKET  TOKEN  \]
+OP_LBRACE  TOKEN  {
+OP_RBRACE  TOKEN  }
+OP_COMMA  TOKEN  ,
+OP_SEMI  TOKEN  ;
+OP_COLON  TOKEN  :
+OP_PLUS  TOKEN  \+
+OP_MINUS  TOKEN  -
+OP_STAR  TOKEN  \*
+OP_SLASH  TOKEN  /
+OP_PIPE  TOKEN  \|
