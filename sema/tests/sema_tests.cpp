@@ -1,13 +1,4 @@
-// Тесты семантической проверки Funny (HW3) без внешних зависимостей. Запуск: make test в папке sema/
-//
-// Все эталоны лежат прямо в этом файле (отдельных файлов с данными нет):
-//   good  — программа корректна: ошибок нет;
-//   typed — аннотированный AST (S-expression с типами "узел:тип") совпадает с эталоном;
-//   bad   — список ошибок совпадает с ожидаемым: "строка:столбец: сообщение", по одной на строку;
-//   annot — формат аннотированного AST (JSON, дерево, таблица функций);
-//   robust — проверка не падает на испорченных программах.
-// Каждая проверка попадает в отчёт REPORT_HW3.md (имя, вид, вход, ожидание, результат); отчёт пишется
-// в конце каждого запуска. Другой путь: FUNNY_REPORT=путь ./build/sema_tests (пустая строка — не писать).
+
 #include <algorithm>
 #include <cstdlib>
 #include <fstream>
@@ -24,7 +15,7 @@ using namespace funnysema;
 #endif
 static const char* kTokens = FUNNY_TOKENS;
 
-// ---------- учёт результатов и отчёт ----------
+//  учёт результатов и отчёт
 
 struct Row {
     std::string kind, name, input, expected, got;
@@ -202,7 +193,7 @@ static void test_names() {
         "1:64: unknown variable 'i'\n");
 }
 
-// ---------- 2. типы: выражения, операторы, вызовы ----------
+//  2. типы: выражения, операторы, вызовы
 
 static void test_types() {
     // присваивания
@@ -304,7 +295,7 @@ static void test_calls() {
     Good("formula_calls_formula_and_function", "g(x: int) returns q: int q = x;\np(x: int) => x > 0\nq(x: int) => p(x) and g(x) > 1");
 }
 
-// ---------- 3. все ошибки сразу, а не только первая ----------
+//  3. все ошибки сразу, а не только первая
 
 static void test_multiple_errors() {
     Bad("several_errors_in_one_function",
@@ -334,7 +325,7 @@ static void test_multiple_errors() {
     Bad("syntax_error_hides_semantic_errors", "f() returns r: int ensures zz > 0 r = ;", "syntax: 1:39: expected expression, found ';'\n");
 }
 
-// ---------- 4. корректные программы ----------
+//  4. корректные программы
 
 static void test_good_programs() {
     Good("gcd", "gcd(x: int, y: int) requires x > 0 and y > 0 returns r: int ensures r > 0 uses a: int, b: int\n"
@@ -358,7 +349,7 @@ static void test_good_programs() {
     Good("missing_ensures_is_allowed", "f() returns r: int r = 1;");
 }
 
-// ---------- 5. аннотированный AST ----------
+//  5. аннотированный AST
 
 static void test_typed_ast() {
     E("typed_precedence", "1 + 2 * 3", "(+:int 1:int (*:int 2:int 3:int))");
@@ -481,7 +472,7 @@ static void test_annotation_format() {
     }
 }
 
-// ---------- 6. устойчивость ----------
+//  6. устойчивость
 
 static unsigned rngState = 4242;
 static unsigned rnd(unsigned n) { rngState = rngState * 1664525u + 1013904223u; return (rngState >> 8) % n; }
@@ -545,7 +536,7 @@ static void test_robustness() {
     }
 }
 
-// ---------- отчёт ----------
+//  отчёт
 
 static size_t utf8Len(const std::string& s, size_t i) {
     unsigned char c = s[i];
