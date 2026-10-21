@@ -1,32 +1,12 @@
-CXX      ?= g++
-CXXFLAGS ?= -std=c++17 -O2 -Wall -Wextra
-LIB      := src/funnylex.cpp
+# Корневой Makefile: только делегирует в lexer/ и parser/
+all test clean:
+	$(MAKE) -C lexer $@
+	$(MAKE) -C parser $@
 
-all: build/funny_lexgen build/standalone_lexer build/tests
+lexer-%:
+	$(MAKE) -C lexer $*
 
-build/funny_lexgen: src/main.cpp $(LIB) src/funnylex.hpp
-	@mkdir -p build
-	$(CXX) $(CXXFLAGS) -Isrc src/main.cpp $(LIB) -o $@
+parser-%:
+	$(MAKE) -C parser $*
 
-# таблица переходов: output/dfa_table.{json,csv,hpp} + REPORT.md + прогон data/tests.jsonl
-gen: build/funny_lexgen
-	./build/funny_lexgen
-
-build/standalone_lexer: examples/standalone_lexer.cpp output/dfa_table.hpp
-	$(CXX) $(CXXFLAGS) -Ioutput $< -o $@
-
-build/tests: tests/tests.cpp $(LIB) src/funnylex.hpp
-	@mkdir -p build
-	$(CXX) $(CXXFLAGS) -Isrc tests/tests.cpp $(LIB) -o $@
-
-output/dfa_table.hpp: build/funny_lexgen data/tokens.txt
-	./build/funny_lexgen > /dev/null
-
-test: build/tests gen build/standalone_lexer
-	./build/tests
-	./build/standalone_lexer 'if x<=10 { y = 0; } // ok' > /dev/null
-
-clean:
-	rm -rf build
-
-.PHONY: all gen test clean
+.PHONY: all test clean
