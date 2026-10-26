@@ -1,19 +1,5 @@
 # Формат аннотированного AST
 
-AST — дерево парсера HW2 без изменений (раскладка детей — `../parser/docs/ast.md`). Проверка не меняет узлы, а строит рядом таблицу
-аннотаций: `SemaResult::info[const Node*]` (`NodeInfo`). Для следующих этапов (HW4, проект) доступно:
-
-```cpp
-SemaResult r = funnysema::analyze(*ast);       // src/sema.hpp
-const NodeInfo& i = r.at(node);               // i.type (Ty), i.tuple, i.symbol, i.signature
-r.functions["g"]                               // Signature: params, returns, isFormula, line, col
-r.errors                                       // диагностики {line, col, message}
-```
-
-Типы: `int`, `int[]`, `bool`, кортеж `(int,int[])`, `error` (узел с ошибкой — такие узлы остаются в дереве).
-
-## Что аннотировано
-
 | Узел | `type` | `symbol` | `signature` |
 |---|---|---|---|
 | Number, Neg, Binary, Index | `int` | у Index — роль массива | |
