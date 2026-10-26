@@ -116,7 +116,7 @@ static std::string body(const std::string& stmts) { return kHdr + stmts + "}\n";
 static void BadS(const char* name, const std::string& stmts, const std::string& want) { Bad(name, body(stmts), want); }
 static void GoodS(const char* name, const std::string& stmts) { Good(name, body(stmts)); }
 
-// ---------- 1. таблицы символов: имена и области видимости ----------
+//  1. таблицы символов: имена и области видимости 
 
 static void test_names() {
     BadS("unknown_variable_rhs", "  r = zz;\n", "3:7: unknown variable 'zz'\n");
