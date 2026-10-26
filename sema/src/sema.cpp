@@ -109,8 +109,6 @@ public:
             else if (d->kind == Kind::Formula) checkFormula(*d);
         }
         // Ошибки находились в порядке обхода (сначала requires/ensures, потом тело),
-        // а пользователю удобнее читать их по порядку в файле. stable_sort сохраняет
-        // порядок ошибок с одной и той же позицией.
         std::stable_sort(res.errors.begin(), res.errors.end(), [](const Diagnostic& a, const Diagnostic& b) {
             return a.line != b.line ? a.line < b.line : a.col < b.col;
         });
@@ -178,7 +176,6 @@ private:
     }
 
     // Объявляет переменные из списка Params / Returns / Locals; повторное имя — ошибка (остаётся первое объявление).
-    // Попутно проставляет аннотацию (тип и роль) на узлы VarDef.
     void declareList(const Node* list, Role role) {
         if (!list) return;  // раздела может не быть (например, нет uses)
         for (const auto& v : list->kids) {
@@ -295,7 +292,6 @@ private:
         std::vector<Ty> params;
         std::string what;  // "function" | "builtin" | "formula"
         if (n.text == "length") {
-            // встроенная length ведёт себя как length(a: int[]) returns l: int
             params = {Ty::IntArray};
             rets = {Ty::Int};
             what = "builtin";
@@ -636,8 +632,6 @@ std::string dumpAnnotatedJSON(const Node& n, const SemaResult& r) {
     return out + "\n";
 }
 
-// S-выражение: компактная запись одной строкой, тип после двоеточия (узел:тип).
-// Листья (числа, переменные) печатаются без скобок. Этот формат используют тесты вида typed.
 std::string dumpAnnotatedSexpr(const Node& n, const SemaResult& r) {
     const NodeInfo& i = r.at(n);
     std::string ts = typeString(i);
