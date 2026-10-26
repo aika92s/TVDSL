@@ -1,4 +1,3 @@
-
 #include <algorithm>
 #include <cstdlib>
 #include <fstream>
@@ -15,7 +14,7 @@ using namespace funnysema;
 #endif
 static const char* kTokens = FUNNY_TOKENS;
 
-//  учёт результатов и отчёт
+// ---------- учёт результатов и отчёт ----------
 
 struct Row {
     std::string kind, name, input, expected, got;
@@ -116,7 +115,7 @@ static std::string body(const std::string& stmts) { return kHdr + stmts + "}\n";
 static void BadS(const char* name, const std::string& stmts, const std::string& want) { Bad(name, body(stmts), want); }
 static void GoodS(const char* name, const std::string& stmts) { Good(name, body(stmts)); }
 
-//  1. таблицы символов: имена и области видимости 
+// ---------- 1. таблицы символов: имена и области видимости ----------
 
 static void test_names() {
     BadS("unknown_variable_rhs", "  r = zz;\n", "3:7: unknown variable 'zz'\n");
@@ -193,7 +192,7 @@ static void test_names() {
         "1:64: unknown variable 'i'\n");
 }
 
-//  2. типы: выражения, операторы, вызовы
+// ---------- 2. типы: выражения, операторы, вызовы ----------
 
 static void test_types() {
     // присваивания
@@ -295,7 +294,7 @@ static void test_calls() {
     Good("formula_calls_formula_and_function", "g(x: int) returns q: int q = x;\np(x: int) => x > 0\nq(x: int) => p(x) and g(x) > 1");
 }
 
-//  3. все ошибки сразу, а не только первая
+// ---------- 3. все ошибки сразу, а не только первая ----------
 
 static void test_multiple_errors() {
     Bad("several_errors_in_one_function",
@@ -325,7 +324,7 @@ static void test_multiple_errors() {
     Bad("syntax_error_hides_semantic_errors", "f() returns r: int ensures zz > 0 r = ;", "syntax: 1:39: expected expression, found ';'\n");
 }
 
-//  4. корректные программы
+// ---------- 4. корректные программы ----------
 
 static void test_good_programs() {
     Good("gcd", "gcd(x: int, y: int) requires x > 0 and y > 0 returns r: int ensures r > 0 uses a: int, b: int\n"
@@ -349,7 +348,7 @@ static void test_good_programs() {
     Good("missing_ensures_is_allowed", "f() returns r: int r = 1;");
 }
 
-//  5. аннотированный AST
+// ---------- 5. аннотированный AST ----------
 
 static void test_typed_ast() {
     E("typed_precedence", "1 + 2 * 3", "(+:int 1:int (*:int 2:int 3:int))");
@@ -472,7 +471,7 @@ static void test_annotation_format() {
     }
 }
 
-//  6. устойчивость
+// ---------- 6. устойчивость ----------
 
 static unsigned rngState = 4242;
 static unsigned rnd(unsigned n) { rngState = rngState * 1664525u + 1013904223u; return (rngState >> 8) % n; }
@@ -536,7 +535,7 @@ static void test_robustness() {
     }
 }
 
-//  отчёт
+// ---------- отчёт ----------
 
 static size_t utf8Len(const std::string& s, size_t i) {
     unsigned char c = s[i];
@@ -577,35 +576,28 @@ static void writeReport(const std::string& path) {
     int passed = 0;
     for (auto& r : rows) { count[r.kind]++; passed += r.pass; }
     std::ofstream o(path, std::ios::binary);
-    o << "# HW3 report\n\n";
-    o << "Semantic analysis of Funny: symbol tables with scopes, type checking of expressions, statements and calls, "
-         "diagnostics with positions, annotated AST. Input is the AST of the HW2 parser (HW1 lexer underneath); "
-         "types and limitations are described in `docs/types.md`, the annotated AST format in `docs/annotated_ast.md`.\n\n";
-    o << "## Tests: " << passed << "/" << rows.size() << " passed (good " << count["good"] << ", typed " << count["typed"] << ", bad " << count["bad"]
+    o << "# Отчёт HW3\n\n";
+    o << "Семантический анализ Funny: таблицы символов с областями видимости, проверка типов выражений, операторов и вызовов, "
+         "диагностика с позициями, аннотированный AST. Вход — AST парсера HW2 (под ним лексер HW1); "
+         "типы и ограничения описаны в `docs/types.md`, формат аннотированного AST — в `docs/annotated_ast.md`.\n\n";
+    o << "## Тесты: " << passed << "/" << rows.size() << " пройдено (good " << count["good"] << ", typed " << count["typed"] << ", bad " << count["bad"]
       << ", annot " << count["annot"] << ", robust " << count["robust"] << ")\n\n";
-    o << "`good` — program is correct, no errors are reported; "
-         "`typed` — the annotated AST (S-expression, `node:type`) must match the expected one; "
-         "`bad` — must give exactly the expected diagnostics (`line:col: message`; `syntax:` marks a parser error); "
-         "`annot` — format of the annotated AST (JSON, tree, function table) and of diagnostics; "
-         "`robust` — the checker must not crash on broken programs.\n\n";
-    o << "| name | kind | input | expected | result |\n|---|---|---|---|---|\n";
+    o << "`good` — программа корректна, ошибок нет; "
+         "`typed` — аннотированный AST (S-выражение, `узел:тип`) должен совпасть с эталоном; "
+         "`bad` — должны выдаваться ровно ожидаемые диагностики (`строка:столбец: сообщение`; `syntax:` — ошибка парсера); "
+         "`annot` — формат аннотированного AST (JSON, дерево, таблица функций) и диагностик; "
+         "`robust` — проверка не должна падать на испорченных программах.\n\n";
+    o << "| имя | вид | вход | ожидание | результат |\n|---|---|---|---|---|\n";
     for (auto& r : rows) {
         o << "| " << r.name << " | " << r.kind << " | " << cell(r.input) << " | "
           << (r.kind == "bad" && r.expected.find(':') != std::string::npos && r.expected.back() == '\n' ? cellErrors(r.expected) : cell(r.expected, 400))
           << " | " << (r.pass ? "PASS" : "**FAIL**") << " |\n";
     }
     if (failed) {
-        o << "\n## Failures\n\n";
+        o << "\n## Провалы\n\n";
         for (auto& r : rows)
-            if (!r.pass) o << "- **" << r.name << "**: got " << cell(r.got, 400) << "\n";
+            if (!r.pass) o << "- **" << r.name << "**: получено " << cell(r.got, 400) << "\n";
     }
-    o << "\n## Как устроены тесты `robust`\n\n"
-         "Результат не сверяется с эталоном: проверяется, что конвейер «парсер -> проверка» не падает и не зависает, а список ошибок остаётся "
-         "отсортированным по позиции. Генераторы случайных чисел используют фиксированное начальное значение, поэтому каждый прогон одинаков.\n\n"
-         "- **Все префиксы хороших программ.** Программа режется на куски любой длины; те куски, которые парсер принял без ошибок, идут в проверку типов.\n"
-         "- **Случайные замены идентификаторов** (3000 запусков). В хорошей программе 1-3 слова заменяются другими именами, типом или `length`: "
-         "программа остаётся синтаксически верной, но в ней появляются неизвестные имена, неверные типы и числа аргументов.\n"
-         "- **Глубина.** 150 скобок вокруг выражения и цепочка из 150 ошибочных сложений: ошибки не теряются и не дублируются.\n";
 }
 
 int main() {

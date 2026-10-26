@@ -11,7 +11,7 @@ static bool readAll(const std::string& path, std::string& out) {
     if (path == "-") {
         out.assign(std::istreambuf_iterator<char>(std::cin), {});
         return true;
-    }./build/funny_check examples/bad.fn
+    }
     std::ifstream in(path, std::ios::binary);
     if (!in) return false;
     out.assign(std::istreambuf_iterator<char>(in), {});

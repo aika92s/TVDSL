@@ -1,12 +1,12 @@
-# HW3 report
+# Отчёт HW3
 
-Semantic analysis of Funny: symbol tables with scopes, type checking of expressions, statements and calls, diagnostics with positions, annotated AST. Input is the AST of the HW2 parser (HW1 lexer underneath); types and limitations are described in `docs/types.md`, the annotated AST format in `docs/annotated_ast.md`.
+Семантический анализ Funny: таблицы символов с областями видимости, проверка типов выражений, операторов и вызовов, диагностика с позициями, аннотированный AST. Вход — AST парсера HW2 (под ним лексер HW1); типы и ограничения описаны в `docs/types.md`, формат аннотированного AST — в `docs/annotated_ast.md`.
 
-## Tests: 169/169 passed (good 37, typed 18, bad 99, annot 11, robust 4)
+## Тесты: 169/169 пройдено (good 37, typed 18, bad 99, annot 11, robust 4)
 
-`good` — program is correct, no errors are reported; `typed` — the annotated AST (S-expression, `node:type`) must match the expected one; `bad` — must give exactly the expected diagnostics (`line:col: message`; `syntax:` marks a parser error); `annot` — format of the annotated AST (JSON, tree, function table) and of diagnostics; `robust` — the checker must not crash on broken programs.
+`good` — программа корректна, ошибок нет; `typed` — аннотированный AST (S-выражение, `узел:тип`) должен совпасть с эталоном; `bad` — должны выдаваться ровно ожидаемые диагностики (`строка:столбец: сообщение`; `syntax:` — ошибка парсера); `annot` — формат аннотированного AST (JSON, дерево, таблица функций) и диагностик; `robust` — проверка не должна падать на испорченных программах.
 
-| name | kind | input | expected | result |
+| имя | вид | вход | ожидание | результат |
 |---|---|---|---|---|
 | unknown_variable_rhs | bad | `f(a: int, b: int[]) returns r: int, s: int[] uses i: int\n{\n  r = zz;\n}\n` | `3:7: unknown variable 'zz'` | PASS |
 | unknown_variable_lhs | bad | `f(a: int, b: int[]) returns r: int, s: int[] uses i: int\n{\n  zz = 1;\n}\n` | `3:3: unknown variable 'zz'` | PASS |
@@ -177,11 +177,3 @@ Semantic analysis of Funny: symbol tables with scopes, type checking of expressi
 | random_renames_of_identifiers | robust | `3000 programs with 1-3 random renames` | `no crash, errors sorted by position` | PASS |
 | deep_expression_150 | robust | `150 x '(' around an unknown variable` | `1 semantic error` | PASS |
 | long_left_chain_150_errors | robust | `1 + b + b + ... (150 times)` | `150 semantic error` | PASS |
-
-## Как устроены тесты `robust`
-
-Результат не сверяется с эталоном: проверяется, что конвейер «парсер -> проверка» не падает и не зависает, а список ошибок остаётся отсортированным по позиции. Генераторы случайных чисел используют фиксированное начальное значение, поэтому каждый прогон одинаков.
-
-- **Все префиксы хороших программ.** Программа режется на куски любой длины; те куски, которые парсер принял без ошибок, идут в проверку типов.
-- **Случайные замены идентификаторов** (3000 запусков). В хорошей программе 1-3 слова заменяются другими именами, типом или `length`: программа остаётся синтаксически верной, но в ней появляются неизвестные имена, неверные типы и числа аргументов.
-- **Глубина.** 150 скобок вокруг выражения и цепочка из 150 ошибочных сложений: ошибки не теряются и не дублируются.
