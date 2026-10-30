@@ -1,0 +1,37 @@
+// Корректная программа: все типы согласованы.
+gcd(x: int, y: int)
+  requires x > 0 and y > 0
+  returns r: int
+  ensures r > 0
+  uses a: int, b: int
+{
+  a = x;
+  b = y;
+  while (a != b)
+    invariant a > 0 and b > 0
+  {
+    if (a > b) a = a - b; else b = b - a;
+  }
+  r = a;
+}
+
+divide(a: int, b: int) requires b > 0 returns q: int, r: int ensures a == q * b + r
+{
+  q = 0;
+  r = a;
+  while (r >= b) { r = r - b; q = q + 1; }
+}
+
+useDivide(n: int) returns s: int ensures true uses q: int, r: int
+{
+  q, r = divide(n, 3);
+  s = q + r;
+}
+
+fill(a: int[], n: int) returns b: int[] ensures length(b) == length(a)
+  uses i: int
+{
+  b = a;
+  i = 0;
+  while (i < n) { b[i] = a[i] * 2; i = i + 1; }
+}

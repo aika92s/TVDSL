@@ -1,0 +1,54 @@
+# HW3 — семантические проверки и типы Funny
+
+```
+исходник -> парсер HW2 (../parser, лексер HW1 из ../lexer) -> AST -> sema.cpp -> аннотированный AST + ошибки
+```
+
+Папки `../lexer` и `../parser` используются только на чтение.
+
+## Сборка и запуск
+
+```sh
+cd sema                                   # или из корня: make sema-test
+make test                                 # сборка и все тесты, пишет sema/REPORT_HW3.md
+make build/funny_check                    # только CLI
+./build/funny_check examples/ok.fn            # аннотированный AST деревом
+./build/funny_check --json  examples/ok.fn    # в JSON (с line/col, type, symbol, signature)
+./build/funny_check --sexpr examples/ok.fn    # одной строкой, типы как node:type
+./build/funny_check examples/bad.fn           # несколько ошибок сразу, код возврата 1
+echo 'f() returns r: int r = zz;' | ./build/funny_check -     # "-" = stdin
+```
+
+Код возврата: `0` — ошибок нет, `1` — есть синтаксические или семантические ошибки (в stderr), `2` — неверный вызов.
+Пример ошибки:
+
+```
+<stdin>:1:24: error: unknown variable 'zz'
+    f() returns r: int r = zz;
+                           ^
+```
+
+## Что проверяется
+
+Типы `int`, `int[]` (и внутренний `bool` у условий); все конструкции Funny:
+
+- таблицы символов: области видимости (`requires` / `ensures` / тело / `invariant` / формулы / кванторы), повторные объявления,
+  неизвестные имена, уникальность функций и формул, функции видны во всём модуле;
+- типы выражений, присваиваний, `a[i] = e`, кортежных присваиваний, условий, предикатов, вызовов функций и ссылок на формулы
+  (число и типы аргументов, встроенная `length`), неизменяемость параметров, локальные только `int`, диапазон числовых литералов;
+- диагностика с позицией (строка:столбец) и понятным описанием; проверка не останавливается на первой ошибке.
+
+## Файлы
+
+| Файл | Что это |
+|---|---|
+| `src/sema.{hpp,cpp}` | `analyze(program)` -> `SemaResult{info, functions, errors}`; вывод аннотированного AST |
+| `src/sema_main.cpp` | CLI `funny_check` |
+| `tests/sema_tests.cpp` | все тесты; эталоны лежат в самом файле |
+| `examples/` | `ok.fn` (корректная), `bad.fn` (несколько ошибок) |
+| `docs/types.md`, `docs/annotated_ast.md` | отчёт о типах и ограничениях; формат аннотированного AST |
+| `REPORT_HW3.md` | отчёт о тестах; пишется автоматически при каждом `make test` |
+
+## Тесты
+
+`make test` пишет в конце `REPORT_HW3.md` (имя, вид, вход, ожидание, PASS/FAIL).
