@@ -1,0 +1,12 @@
+graph Interference_compute {
+  node [style=filled, fontname="monospace"];
+  "%t1" [label="%t1 / R0", fillcolor="lightblue"];
+  "%t2" [label="%t2 / R0", fillcolor="lightblue"];
+  "%t3" [label="%t3 / R0", fillcolor="lightblue"];
+  "%t4" [label="%t4 / R1", fillcolor="lightgreen"];
+  "%t5" [label="%t5 / R0", fillcolor="lightblue"];
+  "%t6" [label="%t6 / R0", fillcolor="lightblue"];
+  "%t8" [label="%t8 / R0", fillcolor="lightblue"];
+  "%t9" [label="%t9 / R0", fillcolor="lightblue"];
+  "%t3" -- "%t4";
+}

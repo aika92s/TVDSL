@@ -24,7 +24,6 @@ using NodePtr = std::unique_ptr<Node>;
 // Один универсальный узел: вид + две строки (text/extra) + позиция + дети.
 //   text  — имя / оператор / число / true|false (зависит от вида)
 //   extra — тип переменной ("int" или "int[]") у VarDef, Forall, Exists
-//   line, col — позиция (с 1) первого значимого токена узла
 struct Node {
     Kind kind;
     std::string text, extra;

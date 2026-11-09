@@ -1,0 +1,66 @@
+=== IR before optimization ===
+function compute(x: int) returns (r: int)
+entry:
+  r = copy 0
+  i = copy 0
+  %t0 = mul 2, 3
+  six = copy %t0
+  jump while.head.0
+while.head.0:
+  %t1 = lt i, x
+  branch %t1, while.body.1, while.end.2
+while.body.1:
+  %t2 = lt i, 3
+  branch %t2, if.then.3, if.else.4
+if.then.3:
+  %t3 = add r, six
+  %t4 = add i, 1
+  %t5 = mul %t3, %t4
+  %t6 = add %t5, 0
+  r = copy %t6
+  jump if.end.5
+if.else.4:
+  %t7 = mul 1, 1
+  %t8 = add r, %t7
+  r = copy %t8
+  jump if.end.5
+if.end.5:
+  %t9 = add i, 1
+  i = copy %t9
+  jump while.head.0
+while.end.2:
+  return r
+
+=== IR after optimization ===
+function compute(x: int) returns (r: int)
+entry:
+  r = copy 0
+  i = copy 0
+  six = copy 6
+  jump while.head.0
+while.head.0:
+  %t1 = lt i, x
+  branch %t1, while.body.1, while.end.2
+while.body.1:
+  %t2 = lt i, 3
+  branch %t2, if.then.3, if.else.4
+if.then.3:
+  %t3 = add r, six
+  %t4 = add i, 1
+  %t5 = mul %t3, %t4
+  %t6 = copy %t5
+  r = copy %t6
+  jump if.end.5
+if.else.4:
+  %t8 = add r, 1
+  r = copy %t8
+  jump if.end.5
+if.end.5:
+  %t9 = add i, 1
+  i = copy %t9
+  jump while.head.0
+while.end.2:
+  return r
+
+=== Metrics ===
+compute: instructions 30 -> 28, temporaries 10 -> 8, blocks 7, colors 2

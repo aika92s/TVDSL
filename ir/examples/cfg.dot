@@ -1,0 +1,18 @@
+digraph CFG_compute {
+  node [shape=box, fontname="monospace"];
+  B0 [label="B0 entry\\l  entry:\\l  r = copy 0\\l  i = copy 0\\l  six = copy 6\\l  jump while.head.0\\l"];
+  B1 [label="B1 while.head.0\\l  while.head.0:\\l  %t1 = lt i, x\\l  branch %t1, while.body.1, while.end.2\\l"];
+  B2 [label="B2 while.body.1\\l  while.body.1:\\l  %t2 = lt i, 3\\l  branch %t2, if.then.3, if.else.4\\l"];
+  B3 [label="B3 if.then.3\\l  if.then.3:\\l  %t3 = add r, six\\l  %t4 = add i, 1\\l  %t5 = mul %t3, %t4\\l  %t6 = copy %t5\\l  r = copy %t6\\l  jump if.end.5\\l"];
+  B4 [label="B4 if.else.4\\l  if.else.4:\\l  %t8 = add r, 1\\l  r = copy %t8\\l  jump if.end.5\\l"];
+  B5 [label="B5 if.end.5\\l  if.end.5:\\l  %t9 = add i, 1\\l  i = copy %t9\\l  jump while.head.0\\l"];
+  B6 [label="B6 while.end.2\\l  while.end.2:\\l  return r\\l"];
+  B0 -> B1;
+  B1 -> B2;
+  B1 -> B6;
+  B2 -> B3;
+  B2 -> B4;
+  B3 -> B5;
+  B4 -> B5;
+  B5 -> B1;
+}
