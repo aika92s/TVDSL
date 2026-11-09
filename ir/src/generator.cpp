@@ -93,6 +93,7 @@ private:
         return d;
     }
 
+    // разбирает выражения в трёхадресный код
     Operand expression(const Node& n) {
         switch (n.kind) {
             case Kind::Number: {
@@ -152,6 +153,7 @@ private:
         }
     }
 
+    // обрабатывает if, while, присваивания и return
     void statement(const Node& n) {
         switch (n.kind) {
             case Kind::Block:

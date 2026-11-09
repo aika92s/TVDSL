@@ -80,6 +80,7 @@ bool simplify(Instruction& in) {
     return false;
 }
 
+    //Для каждого блока ведёт таблицу известных констант.
 void localRewrite(FunctionIR& fn, const OptimizationOptions& options) {
     CFG cfg = buildCFG(fn);
     for (const auto& block : cfg.blocks) {
@@ -92,12 +93,12 @@ void localRewrite(FunctionIR& fn, const OptimizationOptions& options) {
                     if (!a.isImmediate() && it != constants.end()) a = Operand::imm(it->second);
                 }
                 std::int32_t value = 0;
-                if (fold(in.op, in.args, value) && in.dst.size() == 1) {
+                if (fold(in.op, in.args, value) && in.dst.size() == 1) { // вызывает fold() для вычисления выражений
                     in.op = Op::Copy;
                     in.args = {Operand::imm(value)};
                 }
             }
-            if (options.algebraicSimplification) simplify(in);
+            if (options.algebraicSimplification) simplify(in); // simplify() для правил x+0, x*1, x*0, булевых тождеств.
 
             for (const auto& d : in.dst) {
                 if (d.isImmediate()) continue;
@@ -111,7 +112,7 @@ void localRewrite(FunctionIR& fn, const OptimizationOptions& options) {
         }
     }
 }
-
+//Удаляет инструкции, чей результат нигде не живёт.
 bool removable(const Instruction& in) {
     switch (in.op) {
         case Op::Copy: case Op::Neg: case Op::Add: case Op::Sub: case Op::Mul:
@@ -122,7 +123,8 @@ bool removable(const Instruction& in) {
             return false;
     }
 }
-
+    // Деление и load в removable не входят, поэтому они остаются. Цикл повторяется, пока что-то удаляется.
+    //нельзя удалять итерацию по массиву и деление на 0, потому что они могут выкинуть исключение
 void dce(FunctionIR& fn) {
     bool changed;
     do {
@@ -156,6 +158,7 @@ void dce(FunctionIR& fn) {
 
 }  // namespace
 
+    //вызывает localRewrite, затем dce, затем чистит таблицу типов от исчезнувших %t
 FunctionIR optimize(const FunctionIR& input, const OptimizationOptions& options) {
     FunctionIR result = input;
     if (options.constantPropagation || options.algebraicSimplification) localRewrite(result, options);

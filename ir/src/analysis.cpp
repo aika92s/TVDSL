@@ -32,6 +32,7 @@ void addEdge(InterferenceGraph& graph, const std::string& a, const std::string& 
 
 }  // namespace
 
+// Режет код на базовые блоки по меткам и терминаторам (jump, branch, return)
 CFG buildCFG(const FunctionIR& fn) {
     CFG cfg;
     if (fn.code.empty()) return cfg;
@@ -74,6 +75,7 @@ CFG buildCFG(const FunctionIR& fn) {
     return cfg;
 }
 
+// Для каждого блока считает use, def, liveIn, liveOut и повторяет вычисление, пока значения не перестанут меняться
 void computeLiveness(const FunctionIR& fn, CFG& cfg) {
     for (auto& block : cfg.blocks) {
         block.use.clear(); block.def.clear(); block.liveIn.clear(); block.liveOut.clear();
@@ -100,6 +102,7 @@ void computeLiveness(const FunctionIR& fn, CFG& cfg) {
     } while (changed);
 }
 
+// Идет по блоку с конца. Всё, что живо в момент определения временной, получает с ней ребро
 InterferenceGraph buildInterferenceGraph(const FunctionIR& fn, const CFG& cfg) {
     InterferenceGraph graph;
     for (const auto& in : fn.code) {
@@ -121,6 +124,7 @@ InterferenceGraph buildInterferenceGraph(const FunctionIR& fn, const CFG& cfg) {
     return graph;
 }
 
+// Сортирует вершины по убыванию степени, потом по имени. Каждой даёт наименьший цвет, не занятый соседями.
 void greedyColor(InterferenceGraph& graph) {
     std::vector<std::string> order;
     for (const auto& [v, adj] : graph.edges) { (void)adj; order.push_back(v); }

@@ -10,6 +10,7 @@ namespace funnyir {
 
 enum class OperandKind { Immediate, Variable, Temporary };
 
+// Описывает Operand (число, переменная или временная %t)
 struct Operand {
     OperandKind kind = OperandKind::Immediate;
     std::string name;
@@ -21,7 +22,7 @@ struct Operand {
     bool isImmediate() const { return kind == OperandKind::Immediate; }
     bool isTemporary() const { return kind == OperandKind::Temporary; }
 };
-
+//  Op (все инструкции от Copy до Return)
 enum class Op {
     Label, Copy, Neg, Add, Sub, Mul, Div,
     Eq, Ne, Lt, Le, Gt, Ge, Not, And, Or,
@@ -38,7 +39,7 @@ struct Instruction {
     bool isTerminator() const;
     bool hasSideEffects() const;
 };
-
+    
 struct FunctionIR {
     std::string name;
     std::vector<std::string> params;
